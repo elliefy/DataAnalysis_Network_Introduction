@@ -1,6 +1,6 @@
-Brief Introduction - Network in online discussion forum
+Brief Introduction - Network visualization in online discussion forum
 ----------------
-
+This tutorial introduced how to visualize a network from "post-reply" relations in an online forum dataset.
 
 Preparation - Install packages
 ----------------
