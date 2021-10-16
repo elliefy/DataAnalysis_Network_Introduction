@@ -1,6 +1,6 @@
-Brief Introduction - LDA
+Brief Introduction - Network in online discussion forum
 ----------------
-LDA stands for Latent Dirichelet Allocation. LDA topic modeling is a computational text analysis method used to find “latent” thematic structure of a given textual dataset.
+
 
 Preparation - Install packages
 ----------------
@@ -16,44 +16,30 @@ library(rmarkdown)</code></pre>
 
 Pre-Process data frames
 ----------------
-<pre class="r"><code>df <- read.csv("BidenFoxNBC.csv", header = TRUE, sep = ",")
-df$text <- as.character(df$text)
-df$source <- as.character(df$text)
-df_corpus <- corpus(df$text)
-docvars(df_corpus, "source") <- df$source
-metadoc(df_corpus, "language") <- "english"</code></pre>
+<pre class="r"><code>pkgs = c("tidyverse", "igraph", "ggraph", "tidygraph")
+#load packages
+ld_pkgs = lapply(pkgs, library, character.only = TRUE)</code></pre>
 
-Clean text data
+Identify node and edge files
 ----------------
-<pre class="r"><code>df_dfm <- dfm(df_corpus, remove = stopwords("en"), remove_punct = TRUE)
-#df_dfm
-df_dfm_trim <- dfm_trim(df_dfm, min_termfreq = 2, max_docfreq = 100)
-#df_dfm_trim</code></pre>
+<pre class="r"><code>edges0 = read.csv("demo_ntwk.csv", sep = ",", header = TRUE)
+edges = edges0 %>% select(from, to)
+edges1 = edges %>% count(from, to) %>% ungroup() %>%  rename(weight = n) 
+nodes0 = read.csv("node_feature.csv", sep = ",", header = TRUE)</code></pre>
 
-Decide the number of topics (K)
+Create edge files
 ----------------
-<pre class="r"><code>result <- FindTopicsNumber(df_dfm_trim, 
-                           topics = seq(from = 10, to = 20, by = 1),
-                           metrics = c("Griffiths2004", 
-                                       "CaoJuan2009", "Arun2010", 
-                                       "Deveaud2014"),
-                           method = "Gibbs", 
-                           control = list(seed = 123), 
-                           mc.cores = 2L, 
-                           verbose = TRUE)</code></pre>
-
-<pre class="r"><code>r# Validation
-n_topics <- c(5, 10, 15, 20)
-lda_compare <- n_topics %>% 
-  map(LDA, x = df_dfm_trim, control = list(seed = 123))
-data_frame(k = n_topics, 
-           perplex = map_dbl(lda_compare, perplexity)) %>% 
-  ggplot(aes(k, perplex)) + 
-  geom_point() + 
-  geom_line() + 
-  labs(title = "Evaluation for LDA topic modeling", 
-       x = "Number of topics", 
-       y = "Perplexity")</code></pre>
+<pre class="r"><code>#all degree
+temp_total = as.data.frame(table(c(as.character(edges0$to), as.character(edges0$from))))
+colnames(temp_total) = c("Users","total_degree")
+#in degree
+temp_in = as.data.frame(table(edges0$to))
+colnames(temp_in) = c("Users","in_degree")
+#out degree
+temp_out = as.data.frame(table(edges0$from))
+colnames(temp_out) = c("Users","out_degree")
+#num of initial posts per author
+df_num_msg = edges0 %>% select(to, post) %>% unique() %>% count(to) %>% ungroup() %>% rename(num_initiated_post = n)</code></pre>
 
 Run LDA topic modeling
 ----------------
