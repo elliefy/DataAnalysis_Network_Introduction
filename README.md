@@ -41,31 +41,24 @@ colnames(temp_out) = c("Users","out_degree")
 #num of initial posts per author
 df_num_msg = edges0 %>% select(to, post) %>% unique() %>% count(to) %>% ungroup() %>% rename(num_initiated_post = n)</code></pre>
 
-Run LDA topic modeling
+Mege node and edge files
 ----------------
-<pre class="r"><code>k <- 20 # Number of topics
-control_LDA <- list(alpha = 50/k, estimate.beta = TRUE, 
-                    verbose = 0, prefix = tempfile(), 
-                    save = 0, keep = 0, 
-                    seed = 123, nstart = 1, 
-                    best = TRUE, delta = 0.1, iter = 2000, 
-                    burnin = 100, thin = 2000)
-lda = LDA(df_dfm_trim, k = k, method = "Gibbs", 
-          control = control_LDA)
-terms(lda, 10)</code></pre>
+<pre class="r"><code>#merge: note that not all Users in node feature file appeared in the edge list file
+nodes = temp_total %>% left_join(temp_in, by = "Users") %>% left_join(temp_out, by = "Users") %>% left_join(df_num_msg, by = c("Users" = "to"))
+nodes[is.na(nodes)] = 0
+nodes = nodes %>%
+  left_join(nodes0, by = "Users") %>% mutate_if(is.factor, as.character)
+nodes$sex[is.na(nodes$sex)] = "na"
+nodes$sex[is.na(nodes$edu2)] = "na"
+nodes$sex[is.na(nodes$age_group)] = "na"
+nodes$sex[is.na(nodes$live)] = "na"</code></pre>
 
 Visualization
 ----------------
-<pre class="r"><code># Terms within each topic
-topics <- tidy(lda, matrix = "beta")
-top_terms <- topics %>% group_by(topic) %>% 
-  top_n(6, beta) %>% 
-  ungroup() %>%
-  arrange(topic, -beta)
-
-top_terms %>% mutate(term = reorder(term, beta)) %>% 
-  ggplot(aes(term, beta, fill = factor(topic))) + 
-  geom_col(show.legend = FALSE) + 
-  facet_wrap(~ topic, scales = "free") + 
-  coord_flip()</code></pre>
+<pre class="r"><code>disc_net <- tidygraph::tbl_graph(nodes = nodes, 
+                                 edges = edges1, directed = TRUE)
+ggraph(disc_net, layout = 'nicely') + 
+  geom_edge_link(aes(width = weight), alpha = 0.5) + 
+  scale_edge_width(range = c(0.2, 1)) +
+  geom_node_point(aes(color = as.factor(sex), size = in_degree))</code></pre>
 
