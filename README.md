@@ -41,4 +41,13 @@ dev.off()</code></pre>
 
 Degree index
 ----------------
+<pre class="r"><code>#all degree
+temp_total = as.data.frame(table(c(as.character(df$author), as.character(df$user))))
+colnames(temp_total) = c("Users","total_degree")
+#in degree
+temp_in = as.data.frame(table(df$author))
+colnames(temp_in) = c("Users","in_degree")
+#out degree
+temp_out = as.data.frame(table(df$user))
+colnames(temp_out) = c("Users","out_degree")</code></pre>
 
