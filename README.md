@@ -38,6 +38,7 @@ plot(net2,vertex.label=NA,vertex.size = 2,
      vertex.label=TRUE)
 #plot(net2,vertex.label=NA, vertex.size = 1, rescale=FALSE,layout=l)
 dev.off()</code></pre>
+ <p align="center"><img src="Reddit_demo.png" width="650px"/></p>
 
 Degree index
 ----------------
@@ -50,4 +51,4 @@ colnames(temp_in) = c("Users","in_degree")
 #out degree
 temp_out = as.data.frame(table(df$user))
 colnames(temp_out) = c("Users","out_degree")</code></pre>
- <p align="center"><img src="Reddit_demo.png" width="650px"/></p>
+
