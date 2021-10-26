@@ -50,4 +50,4 @@ colnames(temp_in) = c("Users","in_degree")
 #out degree
 temp_out = as.data.frame(table(df$user))
 colnames(temp_out) = c("Users","out_degree")</code></pre>
-
+ <p align="center"><img src="Reddit_demo.png" width="650px"/></p>
